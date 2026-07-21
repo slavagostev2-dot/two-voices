@@ -4,43 +4,68 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#eaf7ff">
-  <meta name="description" content="Два Голоса — совместный тест для пары с прохождением на одном или разных устройствах.">
-  <title>Два Голоса — карта отношений</title>
+  <meta name="description" content="Два Голоса — независимый тест для пары: 30 вопросов каждому, 10 сфер отношений и 30+ персональных выводов.">
+  <meta property="og:title" content="Два Голоса — вы правда видите одни и те же отношения?">
+  <meta property="og:description" content="Пройдите независимо и сравните две версии ваших отношений: сильные стороны, слепые зоны, различия и точки роста.">
+  <title>Два Голоса — две версии одних отношений</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <header class="shell topbar">
-    <div class="brand"><span class="logo">∞</span><span>Два Голоса</span></div>
-    <div class="tag">30 вопросов · 10 сфер · 2 режима</div>
+    <button class="brand brand-button" type="button" onclick="newTest()" aria-label="На главную">
+      <span class="logo">∞</span><span>Два Голоса</span>
+    </button>
+    <div class="tag">30 вопросов · 10 сфер · 30+ выводов</div>
   </header>
 
   <main id="landing">
     <section class="shell hero">
       <div class="hero-copy">
-        <div class="eyebrow">Карта отношений без гаданий</div>
-        <h1>Два человека.<br><em>Две версии.</em><br>Одна картина.</h1>
-        <p>Пройдите тест рядом или с разных устройств. Мы сопоставим 10 важных сфер отношений и покажем не только общий индекс пары, но и то, как каждый из вас видит эти отношения.</p>
+        <div class="eyebrow">Две версии одних отношений</div>
+        <h1>Вы уверены, что <em>видите вашу пару одинаково?</em></h1>
+        <p>Ответьте независимо друг от друга. Мы сопоставим не только оценки отношений, но и то, где один уже чувствует напряжение, которое второй почти не замечает.</p>
         <div class="actions">
-          <button class="btn primary" onclick="openMode()">Начать тест →</button>
+          <button class="btn primary" onclick="openMode()">Начать разбор →</button>
           <button class="btn secondary" onclick="demoResult()">Посмотреть пример</button>
         </div>
-        <div class="hero-note">Около 7–10 минут на человека · ответы второго участника не показываются до завершения обоих</div>
+        <div class="trustline"><span>Без регистрации</span><span>Ответы скрыты до финала</span><span>Можно с двух телефонов</span></div>
       </div>
+
       <aside class="hero-card">
-        <div class="mini-score"><div><span>Пример индекса пары</span><strong>84%</strong></div><div class="spark">✦</div></div>
+        <div class="mini-kicker">Пример результата</div>
+        <div class="mini-archetype">Тихая гавань,<br>живые различия</div>
+        <div class="mini-score"><strong>84%</strong><span>индекс пары</span></div>
         <div class="mini-bars">
           <div class="bar-row"><span>Доверие</span><div class="track"><div class="fill" style="width:92%"></div></div><b>92</b></div>
-          <div class="bar-row"><span>Общение</span><div class="track"><div class="fill" style="width:81%"></div></div><b>81</b></div>
-          <div class="bar-row"><span>Близость</span><div class="track"><div class="fill" style="width:87%"></div></div><b>87</b></div>
-          <div class="bar-row"><span>Будущее</span><div class="track"><div class="fill" style="width:76%"></div></div><b>76</b></div>
+          <div class="bar-row"><span>Близость</span><div class="track"><div class="fill" style="width:86%"></div></div><b>86</b></div>
+          <div class="bar-row"><span>Быт</span><div class="track"><div class="fill" style="width:64%"></div></div><b>64</b></div>
         </div>
       </aside>
     </section>
 
-    <section class="shell features">
-      <article class="feature"><span>01</span><b>Два способа прохождения</b><p>На одном телефоне или по персональным ссылкам с разных устройств.</p></article>
-      <article class="feature"><span>02</span><b>10 сфер вместо одной цифры</b><p>Доверие, общение, конфликты, поддержка, близость, границы, ревность, деньги, быт и будущее.</p></article>
-      <article class="feature"><span>03</span><b>Два индивидуальных профиля</b><p>Отчёт показывает, где каждый чувствует себя уверенно, а где видит отношения сложнее.</p></article>
+    <section class="shell hooks">
+      <article><span>01</span><b>Где вы живёте будто в двух разных отношениях?</b><p>Покажем темы, которые один оценивает заметно иначе второго.</p></article>
+      <article><span>02</span><b>Что вас действительно держит вместе?</b><p>Найдём не общий комплимент, а конкретные сильные сферы и совпадения.</p></article>
+      <article><span>03</span><b>Кто оценивает отношения теплее?</b><p>Сравним восприятие без сомнительного вывода «кто любит больше».</p></article>
+      <article><span>04</span><b>Какой у вас архетип пары?</b><p>Эмоциональная формулировка строится из ваших реальных показателей.</p></article>
+    </section>
+
+    <section class="shell feature-band">
+      <div><div class="eyebrow">После 30 вопросов каждому</div><h2>Не один процент, а полноценная карта пары</h2></div>
+      <div class="feature-list">
+        <span>Индекс пары и согласованность взглядов</span>
+        <span>10 сфер отношений</span>
+        <span>2 индивидуальных профиля</span>
+        <span>Сильнейшие совпадения и слепые зоны</span>
+        <span>Сигналы, которые стоит обсудить серьёзно</span>
+        <span>План разговора и действий на 7 дней</span>
+        <span>Развлекательный астро-бонус — только если указаны даты рождения</span>
+      </div>
+    </section>
+
+    <section class="shell honesty">
+      <div class="honesty-icon">✓</div>
+      <div><b>Без гаданий там, где нужна честность.</b><p>Основной результат строится только из ответов пары. Астрологический блок, если вы его включили датами рождения, отдельно помечается как развлекательный и не влияет ни на один основной показатель.</p></div>
     </section>
   </main>
 
@@ -51,10 +76,12 @@
   <section id="resultsSection" class="app-wrap hidden">
     <div class="shell results">
       <div class="result-actions">
+        <button class="btn secondary" onclick="shareResult()">Поделиться</button>
         <button class="btn secondary" onclick="window.print()">Сохранить PDF</button>
         <button class="btn ghost" onclick="deleteData()">Удалить данные</button>
         <button class="btn primary" onclick="newTest()">Новый тест</button>
       </div>
+      <div id="shareStatus" class="share-status"></div>
       <div id="resultsRoot"></div>
     </div>
   </section>
