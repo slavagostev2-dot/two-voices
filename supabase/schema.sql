@@ -1,6 +1,6 @@
--- Два Голоса — схема сетевого режима, версия анкеты 2026-07-v2.
--- Этот файл можно повторно выполнить поверх предыдущей версии.
--- Старые тестовые записи с 18 ответами сохраняются, новые сессии v2 используют 30 ответов.
+-- Два Голоса — схема сетевого режима, версия анкеты 2026-07-v3.
+-- Файл можно повторно выполнить поверх v1/v2.
+-- Старые записи сохраняются; новые v3-сессии используют 30 ответов и могут хранить две необязательные даты рождения.
 
 create schema if not exists extensions;
 create extension if not exists pgcrypto with schema extensions;
@@ -12,6 +12,8 @@ create table if not exists public.couple_sessions (
   name_a text not null,
   name_b text not null,
   start_month text,
+  birth_a date,
+  birth_b date,
   token_a_hash bytea not null,
   token_b_hash bytea not null,
   answers_a smallint[],
@@ -22,6 +24,9 @@ create table if not exists public.couple_sessions (
   updated_at timestamptz not null default now(),
   expires_at timestamptz not null default (now() + interval '30 days')
 );
+
+alter table public.couple_sessions add column if not exists birth_a date;
+alter table public.couple_sessions add column if not exists birth_b date;
 
 alter table public.couple_sessions drop constraint if exists couple_sessions_name_a_length;
 alter table public.couple_sessions drop constraint if exists couple_sessions_name_b_length;
@@ -39,15 +44,20 @@ alter table public.couple_sessions
   add constraint couple_sessions_answers_b_length check (answers_b is null or cardinality(answers_b) in (18,30));
 
 create index if not exists couple_sessions_expires_at_idx on public.couple_sessions(expires_at);
-
 alter table public.couple_sessions enable row level security;
 revoke all on table public.couple_sessions from anon, authenticated;
 
-create or replace function public.create_couple_session(
+-- Удаляем старую сигнатуру create_couple_session, чтобы PostgREST не видел неоднозначные overload-варианты.
+drop function if exists public.create_couple_session(text,text,text,text);
+drop function if exists public.create_couple_session(text,text,date,date,text,text);
+
+create function public.create_couple_session(
   p_name_a text,
   p_name_b text,
+  p_birth_a date default null,
+  p_birth_b date default null,
   p_start_month text default null,
-  p_question_version text default '2026-07-v2'
+  p_question_version text default '2026-07-v3'
 )
 returns jsonb
 language plpgsql
@@ -77,6 +87,14 @@ begin
     raise exception 'Некорректный месяц начала отношений.';
   end if;
 
+  if p_birth_a is not null and p_birth_a > current_date then
+    raise exception 'Дата рождения первого участника не может быть в будущем.';
+  end if;
+
+  if p_birth_b is not null and p_birth_b > current_date then
+    raise exception 'Дата рождения второго участника не может быть в будущем.';
+  end if;
+
   v_token_a := encode(gen_random_bytes(24),'hex');
   v_token_b := encode(gen_random_bytes(24),'hex');
 
@@ -84,10 +102,10 @@ begin
     v_room := upper(substr(encode(gen_random_bytes(8),'hex'),1,10));
     begin
       insert into public.couple_sessions(
-        room_code,question_version,name_a,name_b,start_month,token_a_hash,token_b_hash
+        room_code,question_version,name_a,name_b,birth_a,birth_b,start_month,token_a_hash,token_b_hash
       )
       values(
-        v_room,p_question_version,p_name_a,p_name_b,p_start_month,
+        v_room,p_question_version,p_name_a,p_name_b,p_birth_a,p_birth_b,p_start_month,
         digest(v_token_a,'sha256'),digest(v_token_b,'sha256')
       )
       returning * into v_row;
@@ -103,6 +121,8 @@ begin
     'token_b',v_token_b,
     'name_a',v_row.name_a,
     'name_b',v_row.name_b,
+    'birth_a',v_row.birth_a,
+    'birth_b',v_row.birth_b,
     'start_month',v_row.start_month,
     'question_version',v_row.question_version,
     'expires_at',v_row.expires_at
@@ -113,7 +133,7 @@ $$;
 create or replace function public.get_couple_session(
   p_room_code text,
   p_token text,
-  p_question_version text default '2026-07-v2'
+  p_question_version text default '2026-07-v3'
 )
 returns jsonb
 language plpgsql
@@ -157,6 +177,8 @@ begin
     'role',v_role,
     'name_a',v_row.name_a,
     'name_b',v_row.name_b,
+    'birth_a',v_row.birth_a,
+    'birth_b',v_row.birth_b,
     'start_month',v_row.start_month,
     'question_version',v_row.question_version,
     'completed_a',v_row.completed_a,
@@ -172,7 +194,7 @@ create or replace function public.submit_couple_answers(
   p_room_code text,
   p_token text,
   p_answers smallint[],
-  p_question_version text default '2026-07-v2'
+  p_question_version text default '2026-07-v3'
 )
 returns jsonb
 language plpgsql
@@ -231,6 +253,8 @@ begin
     'role',v_role,
     'name_a',v_row.name_a,
     'name_b',v_row.name_b,
+    'birth_a',v_row.birth_a,
+    'birth_b',v_row.birth_b,
     'start_month',v_row.start_month,
     'question_version',v_row.question_version,
     'completed_a',v_row.completed_a,
@@ -245,7 +269,7 @@ $$;
 create or replace function public.delete_couple_session(
   p_room_code text,
   p_token text,
-  p_question_version text default '2026-07-v2'
+  p_question_version text default '2026-07-v3'
 )
 returns jsonb
 language plpgsql
@@ -294,16 +318,18 @@ begin
 end;
 $$;
 
-revoke all on function public.create_couple_session(text,text,text,text) from public;
+revoke all on function public.create_couple_session(text,text,date,date,text,text) from public;
 revoke all on function public.get_couple_session(text,text,text) from public;
 revoke all on function public.submit_couple_answers(text,text,smallint[],text) from public;
 revoke all on function public.delete_couple_session(text,text,text) from public;
 revoke all on function public.delete_expired_couple_sessions() from public;
 
-grant execute on function public.create_couple_session(text,text,text,text) to anon,authenticated;
+grant execute on function public.create_couple_session(text,text,date,date,text,text) to anon,authenticated;
 grant execute on function public.get_couple_session(text,text,text) to anon,authenticated;
 grant execute on function public.submit_couple_answers(text,text,smallint[],text) to anon,authenticated;
 grant execute on function public.delete_couple_session(text,text,text) to anon,authenticated;
 
 comment on table public.couple_sessions is
-'Временные записи пар для режима с разных устройств. Прямой доступ браузера к таблице запрещён.';
+'Временные записи пар для режима с разных устройств. Даты рождения необязательны и используются только для отдельного развлекательного астро-блока. Прямой доступ браузера к таблице запрещён.';
+
+notify pgrst, 'reload schema';
